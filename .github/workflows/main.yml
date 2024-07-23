@@ -42,7 +42,7 @@ jobs:
         echo "### Semgrep SAST Results" > comment.md
         cat semgrep-output.json >> comment.md
 
-        - name: DAST Scan
+        - name: RUN DAST Scan
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@v1.0.0
         with:
