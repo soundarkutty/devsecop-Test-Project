@@ -41,4 +41,11 @@ jobs:
       run: |
         echo "### Semgrep SAST Results" > comment.md
         cat semgrep-output.json >> comment.md
+
+        - name: DAST Scan
+        continue-on-error: true
+        uses: PortSwigger/dastardly-github-action@v1.0.0
+        with:
+          target-url: 'http://localhost:9090/'
+          output-filename: 'dastardly-report.xml'
         gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
