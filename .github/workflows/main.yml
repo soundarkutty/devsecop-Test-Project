@@ -1,0 +1,44 @@
+name: CI/CD workflow
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install Semgrep
+      run: |
+        pip install semgrep
+
+    - name: Run Semgrep
+      run: |
+        semgrep --config "p/ci"
+
+    - name: Upload Semgrep results
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: semgrep-results
+        path: semgrep-output.json
+
+    - name: Post results as a comment
+      if: failure()
+      run: |
+        echo "### Semgrep SAST Results" > comment.md
+        cat semgrep-output.json >> comment.md
+        gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
