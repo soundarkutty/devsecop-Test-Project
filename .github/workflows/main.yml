@@ -1,65 +1,49 @@
 name: CI/CD workflow
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: 
+  push: 
+    branches: 
+      - main 
+  pull_request: 
+    branches: 
+      - main 
 
-jobs:
-  build: 
-    runs-on: ubuntu-latest
+jobs: 
+  build-and-scan:  
+    runs-on: ubuntu-latest 
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps: 
+      - name: Checkout code 
+        uses: actions/checkout@v4 
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Set up Python 
+        uses: actions/setup-python@v4 
+        with: 
+          python-version: '3.x' 
 
-    - name: Install Semgrep
-      run: |
-        pip install semgrep
+      - name: Install Semgrep 
+        run: pip install semgrep 
 
-    - name: Run Semgrep
-      run: |
-        semgrep --config "p/ci"
+      - name: Run Semgrep 
+        run: semgrep --config "p/ci" --json > semgrep-output.json
 
-    - name: Upload Semgrep results
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: semgrep-results
-        path: semgrep-output.json
+      - name: Upload Semgrep results 
+        if: failure() 
+        uses: actions/upload-artifact@v3 
+        with: 
+          name: semgrep-results 
+          path: semgrep-output.json 
 
-    - name: Post results as a comment
-      if: failure()
-      run: |
-        echo "### Semgrep SAST Results" > comment.md
-        cat semgrep-output.json >> comment.md
-        
-        jobs:
-  run-dast-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: RUN DAST Scan 
+        continue-on-error: true 
+        uses: PortSwigger/dastardly-github-action@v1.0.0 
+        with: 
+          target-url: 'http://localhost:9090/' 
+          output-filename: 'dastardly-report.xml' 
 
-      - name: RUN DAST Scan
-        continue-on-error: true
-        uses: PortSwigger/dastardly-github-action@v1.0.0
-        with:
-          target-url: 'http://localhost:9090/'
-          output-filename: 'dastardly-report.xml'
-
-      - name: Upload Dastardly Report
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: dastardly-report
+      - name: Upload Dastardly Report 
+        if: always() 
+        uses: actions/upload-artifact@v3 
+        with: 
+          name: dastardly-report 
           path: dastardly-report.xml
- 
