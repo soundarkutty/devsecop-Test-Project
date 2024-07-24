@@ -48,4 +48,4 @@ jobs:
         with:
           target-url: 'http://localhost:9090/'
           output-filename: 'dastardly-report.xml'
-        gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
+      
