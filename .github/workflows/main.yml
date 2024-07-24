@@ -47,3 +47,20 @@ jobs:
         with: 
           name: dastardly-report 
           path: dastardly-report.xml
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v3 
+        with:
+          name: All-Reports
+          path: |
+            dastardly-report.xml
+            semgrep-output.json 
+
+      - name: Execute DefectDojo Script
+        run: |
+          python3 defect-dojo.py
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
