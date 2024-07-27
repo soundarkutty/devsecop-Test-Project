@@ -4,6 +4,9 @@ import json
 import logging
 from datetime import datetime
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def create_engagement(defectdojo_url, defectdojo_api_key, product_id):
     url = f"{defectdojo_url}/api/v2/engagements/"
@@ -54,48 +57,12 @@ def import_scan_results(defectdojo_url, defectdojo_api_key, engagement_id, file_
         logger.error("Unsupported file format")
         return
 
-    files = {
-        'file': (file_path, open(file_path, 'rb'), content_type)
-    }
+    with open(file_path, 'rb') as file:
+        files = {
+            'file': (file_path, file, content_type)
+        }
 
-    response = requests.post(url, headers=headers, data=data, files=files)
-    
+        response = requests.post(url, headers=headers, data=data, files=files)
+
     try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        logger.error(f"Error importing scan results from {file_path}: {err}")
-        return
-
-    logger.info(f"Scan results from {file_path} imported successfully as {scan_type} scan.")
-
-def validate_env_vars():
-    required_env_vars = ['DEFECTDOJO_URL', 'DEFECTDOJO_API_KEY', 'DEFECTDOJO_PRODUCT_ID']
-    for var in required_env_vars:
-        if not os.getenv(var):
-            logger.error(f"Environment variable {var} is not set")
-            return False
-    return True
-
-if __name__ == "__main__":
-    if not validate_env_vars():
-        logger.error("Missing required environment variables. Exiting.")
-        exit(1)
-
-    defectdojo_url = os.getenv('DEFECTDOJO_URL')
-    defectdojo_api_key = os.getenv('DEFECTDOJO_API_KEY')
-    product_id = int(os.getenv('DEFECTDOJO_PRODUCT_ID'))
-
-    engagement_id = create_engagement(defectdojo_url, defectdojo_api_key, product_id)
-    if not engagement_id:
-        logger.error("Failed to create engagement. Exiting.")
-        exit(1)
-
-    report_files = {
-        'dastardly-report.xml': 'Burp Dastardly Scan',
-    }
-
-    for file_path, scan_type in report_files.items():
-        if os.path.exists(file_path):
-            import_scan_results(defectdojo_url, defectdojo_api_key, engagement_id, file_path, scan_type)
-        else:
-            logger.warning(f"{file_path} not found. Skipping upload.")
+        response
