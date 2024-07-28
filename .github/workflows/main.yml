@@ -1,4 +1,4 @@
-name: CI/CD workflow action
+name: CI/CD workflow
 
 on:  
   push:  
@@ -15,6 +15,11 @@ jobs:
     steps:  
       - name: Checkout code  
         uses: actions/checkout@v4  
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
 
       - name: Gitleaks Scan
         run: |
