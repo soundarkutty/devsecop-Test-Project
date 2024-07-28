@@ -16,6 +16,12 @@ jobs:
       - name: Checkout code  
         uses: actions/checkout@v4  
 
+      - name: Gitleaks Scan
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.16.1/gitleaks_8.16.1_linux_x64.tar.gz | tar -xz
+          ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json --redact --log-opts=-1
+        continue-on-error: true
+
       - name: Set up Python  
         uses: actions/setup-python@v4  
         with:  
@@ -54,7 +60,8 @@ jobs:
           name: All-Reports 
           path: |
             dastardly-report.xml
-            semgrep-output.json  
+            semgrep-output.json
+            gitleaks-report.json
 
       - name: Execute DefectDojo Script 
         run: python3 defect-dojo.py 
